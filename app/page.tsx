@@ -12,8 +12,11 @@ export default function Home() {
               <span className="ml-2 text-xl font-bold">QRGraphics</span>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/simple" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
-                Try Now
+              <Link href="/simple" className="px-4 py-2 text-gray-300 hover:text-white transition">
+                Simple QR
+              </Link>
+              <Link href="/create" className="px-4 py-2 bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-600 hover:to-purple-700 rounded-lg transition">
+                Create Pro QR
               </Link>
             </div>
           </div>
@@ -39,12 +42,12 @@ export default function Home() {
           </p>
 
           <div className="flex gap-4 justify-center">
-            <Link href="/simple" className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg font-semibold flex items-center gap-2 transition transform hover:scale-105">
-              Start Creating for Free
+            <Link href="/create" className="px-8 py-4 bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-600 hover:to-purple-700 rounded-lg font-semibold flex items-center gap-2 transition transform hover:scale-105">
+              Create Stunning QR Art
               <ArrowRight className="h-5 w-5" />
             </Link>
-            <Link href="#features" className="px-8 py-4 border border-gray-700 hover:border-gray-600 rounded-lg font-semibold transition">
-              See How It Works
+            <Link href="/simple" className="px-8 py-4 border border-gray-700 hover:border-gray-600 rounded-lg font-semibold transition">
+              Try Simple Mode
             </Link>
           </div>
 
