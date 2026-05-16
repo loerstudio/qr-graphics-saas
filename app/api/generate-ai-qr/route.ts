@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         console.log('Trying GPTIMG2 generation with prompt:', enhancedPrompt)
         console.log('FAL client configured with key length:', process.env.FAL_KEY?.length)
 
-        const result = await fal.subscribe('gptimg2', {
+        const result = await fal.subscribe('openai/gpt-image-2', {
           input: {
             prompt: enhancedPrompt,
             image_size: 'square_hd',
