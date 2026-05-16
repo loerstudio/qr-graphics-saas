@@ -81,66 +81,66 @@ export async function POST(request: NextRequest) {
         console.log('Trying GPTIMG2 generation with prompt:', enhancedPrompt)
         console.log('FAL client configured with key length:', process.env.FAL_KEY?.length)
 
-        const result = await fal.subscribe('fal-ai/flux-schnell', {
+        const result = await fal.subscribe('gptimg2', {
           input: {
             prompt: enhancedPrompt,
             image_size: 'square_hd',
-            num_inference_steps: 4,
+            num_inference_steps: 20,
             num_images: 1,
-            enable_safety_checker: false
+            guidance_scale: 7.5
           }
         }) as any
 
-        console.log('FLUX result:', JSON.stringify(result, null, 2))
+        console.log('GPTIMG2 result:', JSON.stringify(result, null, 2))
 
         if (result.data && result.data.images && result.data.images[0]) {
           const aiImageUrl = result.data.images[0].url
-          console.log('FLUX generation successful! Image URL:', aiImageUrl)
+          console.log('GPTIMG2 generation successful! Image URL:', aiImageUrl)
 
           return NextResponse.json({
             success: true,
             qrCodeUrl: qrDataUrl,
             aiBackgroundUrl: aiImageUrl,
-            aiModel: 'FLUX-SCHNELL',
-            message: 'AI background generated with FLUX Schnell!'
+            aiModel: 'GPTIMG2',
+            message: 'AI background generated with GPTIMG2!'
           })
         } else {
-          console.log('FLUX result structure invalid:', result)
+          console.log('GPTIMG2 result structure invalid:', result)
         }
-      } catch (fluxError) {
-        console.log('FLUX failed, error details:', fluxError)
-        console.log('Error message:', fluxError instanceof Error ? fluxError.message : String(fluxError))
+      } catch (gptimg2Error) {
+        console.log('GPTIMG2 failed, error details:', gptimg2Error)
+        console.log('Error message:', gptimg2Error instanceof Error ? gptimg2Error.message : String(gptimg2Error))
 
-        // Step 4: Fallback to stable diffusion
+        // Step 4: Fallback to NANOBANANA2
         try {
-          console.log('Trying stable-diffusion-v1-5 as fallback...')
-          const fallbackResult = await fal.subscribe('fal-ai/stable-diffusion-v1-5', {
+          console.log('Trying NANOBANANA2 as fallback...')
+          const fallbackResult = await fal.subscribe('nanobanana2', {
             input: {
               prompt: enhancedPrompt,
               image_size: 'square_hd',
-              num_inference_steps: 25,
+              num_inference_steps: 15,
               num_images: 1,
-              guidance_scale: 7.5
+              guidance_scale: 6.0
             }
           }) as any
 
-          console.log('Stable Diffusion result:', JSON.stringify(fallbackResult, null, 2))
+          console.log('NANOBANANA2 result:', JSON.stringify(fallbackResult, null, 2))
 
           if (fallbackResult.data && fallbackResult.data.images && fallbackResult.data.images[0]) {
             const aiImageUrl = fallbackResult.data.images[0].url
-            console.log('Stable Diffusion generation successful!')
+            console.log('NANOBANANA2 generation successful!')
 
             return NextResponse.json({
               success: true,
               qrCodeUrl: qrDataUrl,
               aiBackgroundUrl: aiImageUrl,
-              aiModel: 'STABLE-DIFFUSION',
-              message: 'AI background generated with Stable Diffusion!'
+              aiModel: 'NANOBANANA2',
+              message: 'AI background generated with NANOBANANA2!'
             })
           }
-        } catch (sdError) {
-          console.log('Stable Diffusion also failed:', sdError)
-          console.log('SD Error message:', sdError instanceof Error ? sdError.message : String(sdError))
+        } catch (nanoBananaError) {
+          console.log('NANOBANANA2 also failed:', nanoBananaError)
+          console.log('NANOBANANA2 Error message:', nanoBananaError instanceof Error ? nanoBananaError.message : String(nanoBananaError))
         }
       }
     } catch (aiError) {
