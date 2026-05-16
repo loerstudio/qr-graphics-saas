@@ -25,6 +25,7 @@ export default function CreateQR() {
     qrCodeUrl: string
     finalImage: string
     isAI?: boolean
+    aiModel?: string
   } | null>(null)
 
   const styles = [
@@ -65,7 +66,8 @@ export default function CreateQR() {
           setResult({
             qrCodeUrl: data.qrCodeUrl,
             finalImage: data.aiBackgroundUrl,
-            isAI: true
+            isAI: true,
+            aiModel: data.aiModel || 'AI'
           })
         } else if (data.finalImage) {
           // Fallback gradient
@@ -281,7 +283,7 @@ export default function CreateQR() {
                   </div>
 
                   <div className="text-center text-sm text-gray-500">
-                    QR Code is fully scannable • {result.isAI ? 'AI Generated' : 'Gradient Style'} • 4K Resolution • Commercial Use
+                    QR Code is fully scannable • {result.isAI ? `Generated with ${result.aiModel}` : 'Gradient Style'} • 4K Resolution • Commercial Use
                   </div>
                 </div>
               ) : (

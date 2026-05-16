@@ -59,31 +59,61 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Step 3: Generate AI background using FAL AI
-      const result = await fal.subscribe('fal-ai/flux/schnell', {
-        input: {
-          prompt: enhancedPrompt,
-          image_size: 'square_hd',
-          num_inference_steps: 4,
-          num_images: 1,
-          guidance_scale: 3.5
-        }
-      }) as any
-
-      // Step 4: If AI generation succeeds, return AI image with QR overlay instructions
-      if (result.data && result.data.images && result.data.images[0]) {
-        const aiImageUrl = result.data.images[0].url
-
-        return NextResponse.json({
-          success: true,
-          qrCodeUrl: qrDataUrl,
-          aiBackgroundUrl: aiImageUrl,
-          combinedInstructions: {
-            message: 'AI background generated! Use image editing software to overlay the QR code.',
-            aiImage: aiImageUrl,
-            qrOverlay: qrDataUrl
+      // Step 3: Try GPTIMG2 first
+      try {
+        console.log('Trying GPTIMG2 generation...')
+        const result = await fal.subscribe('gptimg2', {
+          input: {
+            prompt: enhancedPrompt,
+            image_size: 'square_hd',
+            num_inference_steps: 20,
+            num_images: 1,
+            guidance_scale: 7.5
           }
-        })
+        }) as any
+
+        if (result.data && result.data.images && result.data.images[0]) {
+          const aiImageUrl = result.data.images[0].url
+          console.log('GPTIMG2 generation successful!')
+
+          return NextResponse.json({
+            success: true,
+            qrCodeUrl: qrDataUrl,
+            aiBackgroundUrl: aiImageUrl,
+            aiModel: 'GPTIMG2',
+            message: 'AI background generated with GPTIMG2!'
+          })
+        }
+      } catch (gptimg2Error) {
+        console.log('GPTIMG2 failed, trying NANOBANANA2...', gptimg2Error)
+
+        // Step 4: Fallback to NANOBANANA2
+        try {
+          const fallbackResult = await fal.subscribe('nanobanana2', {
+            input: {
+              prompt: enhancedPrompt,
+              image_size: 'square_hd',
+              num_inference_steps: 15,
+              num_images: 1,
+              guidance_scale: 6.0
+            }
+          }) as any
+
+          if (fallbackResult.data && fallbackResult.data.images && fallbackResult.data.images[0]) {
+            const aiImageUrl = fallbackResult.data.images[0].url
+            console.log('NANOBANANA2 generation successful!')
+
+            return NextResponse.json({
+              success: true,
+              qrCodeUrl: qrDataUrl,
+              aiBackgroundUrl: aiImageUrl,
+              aiModel: 'NANOBANANA2',
+              message: 'AI background generated with NANOBANANA2!'
+            })
+          }
+        } catch (nanoBananaError) {
+          console.log('NANOBANANA2 also failed:', nanoBananaError)
+        }
       }
     } catch (aiError) {
       console.log('AI generation failed, falling back to gradient:', aiError)
