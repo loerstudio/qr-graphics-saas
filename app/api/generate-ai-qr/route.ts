@@ -20,13 +20,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'URL and prompt are required' }, { status: 400 })
     }
 
-    // Step 1: Generate high-quality QR code
+    // Step 1: Generate high-quality QR code with transparent background
     const qrCodeBuffer = await QRCode.toBuffer(url, {
-      width: 1024,
-      margin: 2,
+      width: 512,
+      margin: 1,
       color: {
         dark: '#000000',
-        light: '#FFFFFF'
+        light: '#FFFFFF00' // Transparent background
       },
       errorCorrectionLevel: 'H' // High error correction for better AI integration
     })
@@ -76,117 +76,79 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Step 3: Try GPTIMG2 first
-      try {
-        console.log('Trying GPTIMG2 generation with prompt:', enhancedPrompt)
-        console.log('FAL client configured with key length:', process.env.FAL_KEY?.length)
+      // Step 3: Use GPTIMG2 only
+      console.log('Using GPTIMG2 generation with prompt:', enhancedPrompt)
+      console.log('FAL client configured with key length:', process.env.FAL_KEY?.length)
 
-        const result = await fal.subscribe('openai/gpt-image-2', {
-          input: {
-            prompt: enhancedPrompt,
-            image_size: 'square_hd',
-            num_inference_steps: 20,
-            num_images: 1,
-            guidance_scale: 7.5
-          }
-        }) as any
-
-        console.log('GPTIMG2 result:', JSON.stringify(result, null, 2))
-
-        if (result.data && result.data.images && result.data.images[0]) {
-          const aiImageUrl = result.data.images[0].url
-          console.log('GPTIMG2 generation successful! Image URL:', aiImageUrl)
-
-          // Download AI image and composite with QR code
-          const aiImageResponse = await fetch(aiImageUrl)
-          const aiImageBuffer = Buffer.from(await aiImageResponse.arrayBuffer())
-
-          // Composite QR code on center of AI image
-          const composite = await sharp(aiImageBuffer)
-            .resize(1024, 1024)
-            .composite([
-              {
-                input: qrCodeBuffer,
-                top: Math.floor((1024 - 256) / 2),
-                left: Math.floor((1024 - 256) / 2),
-                blend: 'over'
-              }
-            ])
-            .png()
-            .toBuffer()
-
-          const finalImageDataUrl = `data:image/png;base64,${composite.toString('base64')}`
-
-          return NextResponse.json({
-            success: true,
-            qrCodeUrl: qrDataUrl,
-            finalImage: finalImageDataUrl,
-            aiBackgroundUrl: aiImageUrl,
-            aiModel: 'GPTIMG2',
-            message: 'AI QR code generated with GPTIMG2!'
-          })
-        } else {
-          console.log('GPTIMG2 result structure invalid:', result)
+      const result = await fal.subscribe('openai/gpt-image-2', {
+        input: {
+          prompt: enhancedPrompt,
+          image_size: 'square_hd',
+          num_inference_steps: 20,
+          num_images: 1,
+          guidance_scale: 7.5
         }
-      } catch (gptimg2Error) {
-        console.log('GPTIMG2 failed, error details:', gptimg2Error)
-        console.log('Error message:', gptimg2Error instanceof Error ? gptimg2Error.message : String(gptimg2Error))
+      }) as any
 
-        // Step 4: Fallback to NANOBANANA2
-        try {
-          console.log('Trying NANOBANANA2 as fallback...')
-          const fallbackResult = await fal.subscribe('nanobanana2', {
-            input: {
-              prompt: enhancedPrompt,
-              image_size: 'square_hd',
-              num_inference_steps: 15,
-              num_images: 1,
-              guidance_scale: 6.0
+      console.log('GPTIMG2 result:', JSON.stringify(result, null, 2))
+
+      if (result.data && result.data.images && result.data.images[0]) {
+        const aiImageUrl = result.data.images[0].url
+        console.log('GPTIMG2 generation successful! Image URL:', aiImageUrl)
+
+        // Download AI image and composite with QR code
+        const aiImageResponse = await fetch(aiImageUrl)
+        const aiImageBuffer = Buffer.from(await aiImageResponse.arrayBuffer())
+
+        // Create a white background for QR code visibility
+        const qrWithBg = await sharp({
+          create: {
+            width: 300,
+            height: 300,
+            channels: 4,
+            background: { r: 255, g: 255, b: 255, alpha: 0.95 }
+          }
+        })
+        .composite([
+          {
+            input: await sharp(qrCodeBuffer).resize(280, 280).png().toBuffer(),
+            top: 10,
+            left: 10
+          }
+        ])
+        .png()
+        .toBuffer()
+
+        // Composite QR code with background on center-bottom of AI image
+        const composite = await sharp(aiImageBuffer)
+          .resize(1024, 1024)
+          .composite([
+            {
+              input: qrWithBg,
+              top: 1024 - 350, // Bottom area
+              left: Math.floor((1024 - 300) / 2), // Center horizontally
+              blend: 'over'
             }
-          }) as any
+          ])
+          .png()
+          .toBuffer()
 
-          console.log('NANOBANANA2 result:', JSON.stringify(fallbackResult, null, 2))
+        const finalImageDataUrl = `data:image/png;base64,${composite.toString('base64')}`
 
-          if (fallbackResult.data && fallbackResult.data.images && fallbackResult.data.images[0]) {
-            const aiImageUrl = fallbackResult.data.images[0].url
-            console.log('NANOBANANA2 generation successful!')
-
-            // Download AI image and composite with QR code
-            const aiImageResponse = await fetch(aiImageUrl)
-            const aiImageBuffer = Buffer.from(await aiImageResponse.arrayBuffer())
-
-            // Composite QR code on center of AI image
-            const composite = await sharp(aiImageBuffer)
-              .resize(1024, 1024)
-              .composite([
-                {
-                  input: qrCodeBuffer,
-                  top: Math.floor((1024 - 256) / 2),
-                  left: Math.floor((1024 - 256) / 2),
-                  blend: 'over'
-                }
-              ])
-              .png()
-              .toBuffer()
-
-            const finalImageDataUrl = `data:image/png;base64,${composite.toString('base64')}`
-
-            return NextResponse.json({
-              success: true,
-              qrCodeUrl: qrDataUrl,
-              finalImage: finalImageDataUrl,
-              aiBackgroundUrl: aiImageUrl,
-              aiModel: 'NANOBANANA2',
-              message: 'AI QR code generated with NANOBANANA2!'
-            })
-          }
-        } catch (nanoBananaError) {
-          console.log('NANOBANANA2 also failed:', nanoBananaError)
-          console.log('NANOBANANA2 Error message:', nanoBananaError instanceof Error ? nanoBananaError.message : String(nanoBananaError))
-        }
+        return NextResponse.json({
+          success: true,
+          qrCodeUrl: qrDataUrl,
+          finalImage: finalImageDataUrl,
+          aiBackgroundUrl: aiImageUrl,
+          aiModel: 'GPTIMG2',
+          message: 'AI QR code generated with GPTIMG2!'
+        })
+      } else {
+        console.log('GPTIMG2 result structure invalid:', result)
+        throw new Error('Invalid GPTIMG2 response structure')
       }
     } catch (aiError) {
-      console.log('AI generation failed, falling back to gradient:', aiError)
+      console.log('GPTIMG2 failed, falling back to gradient:', aiError)
       console.log('AI Error message:', aiError instanceof Error ? aiError.message : String(aiError))
     }
 
