@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { ArrowRight, QrCode, Sparkles, Zap, Shield, Globe, BarChart3 } from 'lucide-react'
-import { SignInButton, SignUpButton } from '@clerk/nextjs'
 
 export default function Home() {
   return (
@@ -13,16 +12,9 @@ export default function Home() {
               <span className="ml-2 text-xl font-bold">QRGraphics</span>
             </div>
             <div className="flex items-center gap-4">
-              <SignInButton mode="modal">
-                <button className="px-4 py-2 text-gray-300 hover:text-white transition">
-                  Sign In
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
-                  Get Started
-                </button>
-              </SignUpButton>
+              <Link href="/simple" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
+                Try Now
+              </Link>
             </div>
           </div>
         </div>
@@ -47,12 +39,10 @@ export default function Home() {
           </p>
 
           <div className="flex gap-4 justify-center">
-            <SignUpButton mode="modal">
-              <button className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg font-semibold flex items-center gap-2 transition transform hover:scale-105">
-                Start Creating for Free
-                <ArrowRight className="h-5 w-5" />
-              </button>
-            </SignUpButton>
+            <Link href="/simple" className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg font-semibold flex items-center gap-2 transition transform hover:scale-105">
+              Start Creating for Free
+              <ArrowRight className="h-5 w-5" />
+            </Link>
             <Link href="#features" className="px-8 py-4 border border-gray-700 hover:border-gray-600 rounded-lg font-semibold transition">
               See How It Works
             </Link>
@@ -148,11 +138,9 @@ export default function Home() {
                 <li>• Basic analytics</li>
                 <li>• Standard support</li>
               </ul>
-              <SignUpButton mode="modal">
-                <button className="w-full py-2 border border-gray-700 hover:border-gray-600 rounded-lg transition">
-                  Get Started
-                </button>
-              </SignUpButton>
+              <Link href="/simple" className="block w-full py-2 border border-gray-700 hover:border-gray-600 rounded-lg transition text-center">
+                Get Started
+              </Link>
             </div>
 
             <div className="bg-gradient-to-b from-purple-900/20 to-gray-900/50 border border-purple-500 rounded-xl p-6 relative">
