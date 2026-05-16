@@ -53,7 +53,8 @@ export async function combineQRWithImage(
       }
     )
 
-    return Buffer.from(output as string)
+    const result = output as unknown as string
+    return Buffer.from(result)
   } catch (error) {
     console.error('Error combining QR with image:', error)
     throw new Error('Failed to combine QR code with background')
