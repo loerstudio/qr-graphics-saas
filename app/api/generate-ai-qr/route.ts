@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import QRCode from 'qrcode'
-import * as fal from '@fal-ai/serverless-client'
+import { fal } from '@fal-ai/client'
 
 // Configure FAL AI client
 fal.config({
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
           num_images: 1,
           guidance_scale: 3.5
         }
-      })
+      }) as any
 
       // Step 4: If AI generation succeeds, return AI image with QR overlay instructions
       if (result.data && result.data.images && result.data.images[0]) {
