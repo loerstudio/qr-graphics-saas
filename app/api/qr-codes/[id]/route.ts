@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
 import { qrCodes } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
@@ -9,10 +8,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Temporarily disabled auth for demo
+    const userId = 'demo-user'
 
     const { id } = await params
 

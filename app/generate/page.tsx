@@ -3,12 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useUser, UserButton } from '@clerk/nextjs'
 import { QrCode, ArrowLeft, Sparkles, Download, Loader2 } from 'lucide-react'
 
 export default function Generate() {
   const router = useRouter()
-  const { user } = useUser()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -97,7 +95,6 @@ export default function Generate() {
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
               </Link>
-              <UserButton />
             </div>
           </div>
         </div>

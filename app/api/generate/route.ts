@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { generateQRCode } from '@/lib/qr-generator'
 import { generateAIImage } from '@/lib/ai-image-generator'
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Temporarily disabled auth for demo
+    const userId = 'demo-user'
 
     const body = await request.json()
     const { name, url, prompt, useAI } = body

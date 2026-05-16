@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useUser, UserButton } from '@clerk/nextjs'
 import { QrCode, Plus, Download, Eye, Trash2, BarChart3, Link2, Sparkles } from 'lucide-react'
 
 interface QRCodeData {
@@ -17,7 +16,6 @@ interface QRCodeData {
 }
 
 export default function Dashboard() {
-  const { user } = useUser()
   const [qrCodes, setQrCodes] = useState<QRCodeData[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -64,8 +62,10 @@ export default function Dashboard() {
               </Link>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-gray-400">Hi, {user?.firstName || 'User'}</span>
-              <UserButton />
+              <span className="text-gray-400">Hi, User</span>
+              <Link href="/" className="px-4 py-2 text-gray-300 hover:text-white transition">
+                Home
+              </Link>
             </div>
           </div>
         </div>

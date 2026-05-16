@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
 import { qrCodes } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Temporarily disabled auth for demo
+    const userId = 'demo-user'
 
     const userQRCodes = await db
       .select()
@@ -29,10 +26,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Temporarily disabled auth for demo
+    const userId = 'demo-user'
 
     const body = await request.json()
     const { name, url, prompt, qrCodeUrl, imageUrl } = body
