@@ -8,6 +8,8 @@ fal.config({
   credentials: process.env.FAL_KEY || 'your-fal-key-here'
 })
 
+console.log('FAL_KEY configured:', process.env.FAL_KEY ? 'YES' : 'NO')
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -56,6 +58,19 @@ export async function POST(request: NextRequest) {
         break
       default:
         enhancedPrompt = `${prompt}, high quality, professional, detailed, vibrant colors`
+    }
+
+    // Skip AI if no valid FAL_KEY
+    if (!process.env.FAL_KEY || process.env.FAL_KEY === 'your-fal-key-here' || process.env.FAL_KEY === 'your-test-key-here') {
+      console.log('No valid FAL_KEY, using enhanced gradient fallback...')
+      const fallbackResult = await generateGradientQR(url, style, enhancedPrompt)
+      return NextResponse.json({
+        success: true,
+        qrCodeUrl: fallbackResult.qrCodeUrl,
+        finalImage: fallbackResult.finalImage,
+        fallback: true,
+        message: 'Generated with enhanced gradient background (add FAL_KEY for AI)'
+      })
     }
 
     try {
@@ -161,15 +176,20 @@ async function generateGradientQR(url: string, style: string, prompt: string) {
   switch(style) {
     case 'realistic':
       gradientColors = `
-        <stop offset="0%" style="stop-color:#FF4500;stop-opacity:1" />
-        <stop offset="30%" style="stop-color:#FF6B35;stop-opacity:1" />
-        <stop offset="70%" style="stop-color:#F7931E;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#C0392B;stop-opacity:1" />
+        <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+        <stop offset="25%" style="stop-color:#FF4500;stop-opacity:0.8" />
+        <stop offset="50%" style="stop-color:#FF6B35;stop-opacity:0.9" />
+        <stop offset="75%" style="stop-color:#F7931E;stop-opacity:0.7" />
+        <stop offset="100%" style="stop-color:#C0392B;stop-opacity:0.6" />
       `
       backgroundEffects = `
-        <circle cx="20%" cy="30%" r="150" fill="#FF4500" opacity="0.3" filter="url(#glow)" />
-        <circle cx="80%" cy="70%" r="200" fill="#FF6B35" opacity="0.2" filter="url(#glow)" />
-        <circle cx="60%" cy="20%" r="100" fill="#F7931E" opacity="0.4" filter="url(#glow)" />
+        <ellipse cx="30%" cy="40%" rx="250" ry="150" fill="#FF4500" opacity="0.4" filter="url(#fireGlow)" />
+        <ellipse cx="70%" cy="60%" rx="200" ry="300" fill="#FF6B35" opacity="0.3" filter="url(#fireGlow)" />
+        <ellipse cx="60%" cy="20%" rx="180" ry="120" fill="#F7931E" opacity="0.5" filter="url(#fireGlow)" />
+        <ellipse cx="20%" cy="80%" rx="160" ry="200" fill="#C0392B" opacity="0.3" filter="url(#fireGlow)" />
+        <text x="50%" y="15%" text-anchor="middle" fill="#FF6B35" font-size="32" font-weight="bold" opacity="0.6" filter="url(#fireGlow)">
+          FIRE WARRIOR
+        </text>
       `
       break
     case 'neon':
@@ -199,6 +219,13 @@ async function generateGradientQR(url: string, style: string, prompt: string) {
         </radialGradient>
         <filter id="glow">
           <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="fireGlow">
+          <feGaussianBlur stdDeviation="25" result="coloredBlur"/>
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
