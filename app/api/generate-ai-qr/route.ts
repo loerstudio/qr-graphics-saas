@@ -9,6 +9,7 @@ fal.config({
 })
 
 console.log('FAL_KEY configured:', process.env.FAL_KEY ? 'YES' : 'NO')
+console.log('FAL_KEY value starts with:', process.env.FAL_KEY ? process.env.FAL_KEY.substring(0, 10) + '...' : 'NONE')
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,62 +77,74 @@ export async function POST(request: NextRequest) {
     try {
       // Step 3: Try GPTIMG2 first
       try {
-        console.log('Trying GPTIMG2 generation...')
-        const result = await fal.subscribe('gptimg2', {
+        console.log('Trying GPTIMG2 generation with prompt:', enhancedPrompt)
+        console.log('FAL client configured with key length:', process.env.FAL_KEY?.length)
+
+        const result = await fal.subscribe('fal-ai/flux-schnell', {
           input: {
             prompt: enhancedPrompt,
             image_size: 'square_hd',
-            num_inference_steps: 20,
+            num_inference_steps: 4,
             num_images: 1,
-            guidance_scale: 7.5
+            enable_safety_checker: false
           }
         }) as any
 
+        console.log('FLUX result:', JSON.stringify(result, null, 2))
+
         if (result.data && result.data.images && result.data.images[0]) {
           const aiImageUrl = result.data.images[0].url
-          console.log('GPTIMG2 generation successful!')
+          console.log('FLUX generation successful! Image URL:', aiImageUrl)
 
           return NextResponse.json({
             success: true,
             qrCodeUrl: qrDataUrl,
             aiBackgroundUrl: aiImageUrl,
-            aiModel: 'GPTIMG2',
-            message: 'AI background generated with GPTIMG2!'
+            aiModel: 'FLUX-SCHNELL',
+            message: 'AI background generated with FLUX Schnell!'
           })
+        } else {
+          console.log('FLUX result structure invalid:', result)
         }
-      } catch (gptimg2Error) {
-        console.log('GPTIMG2 failed, trying NANOBANANA2...', gptimg2Error)
+      } catch (fluxError) {
+        console.log('FLUX failed, error details:', fluxError)
+        console.log('Error message:', fluxError instanceof Error ? fluxError.message : String(fluxError))
 
-        // Step 4: Fallback to NANOBANANA2
+        // Step 4: Fallback to stable diffusion
         try {
-          const fallbackResult = await fal.subscribe('nanobanana2', {
+          console.log('Trying stable-diffusion-v1-5 as fallback...')
+          const fallbackResult = await fal.subscribe('fal-ai/stable-diffusion-v1-5', {
             input: {
               prompt: enhancedPrompt,
               image_size: 'square_hd',
-              num_inference_steps: 15,
+              num_inference_steps: 25,
               num_images: 1,
-              guidance_scale: 6.0
+              guidance_scale: 7.5
             }
           }) as any
 
+          console.log('Stable Diffusion result:', JSON.stringify(fallbackResult, null, 2))
+
           if (fallbackResult.data && fallbackResult.data.images && fallbackResult.data.images[0]) {
             const aiImageUrl = fallbackResult.data.images[0].url
-            console.log('NANOBANANA2 generation successful!')
+            console.log('Stable Diffusion generation successful!')
 
             return NextResponse.json({
               success: true,
               qrCodeUrl: qrDataUrl,
               aiBackgroundUrl: aiImageUrl,
-              aiModel: 'NANOBANANA2',
-              message: 'AI background generated with NANOBANANA2!'
+              aiModel: 'STABLE-DIFFUSION',
+              message: 'AI background generated with Stable Diffusion!'
             })
           }
-        } catch (nanoBananaError) {
-          console.log('NANOBANANA2 also failed:', nanoBananaError)
+        } catch (sdError) {
+          console.log('Stable Diffusion also failed:', sdError)
+          console.log('SD Error message:', sdError instanceof Error ? sdError.message : String(sdError))
         }
       }
     } catch (aiError) {
       console.log('AI generation failed, falling back to gradient:', aiError)
+      console.log('AI Error message:', aiError instanceof Error ? aiError.message : String(aiError))
     }
 
     // Step 5: Fallback to programmatic gradient if AI fails
