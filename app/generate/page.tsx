@@ -97,7 +97,7 @@ export default function Generate() {
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
               </Link>
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             </div>
           </div>
         </div>

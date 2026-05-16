@@ -65,7 +65,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-gray-400">Hi, {user?.firstName || 'User'}</span>
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             </div>
           </div>
         </div>
