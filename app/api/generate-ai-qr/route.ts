@@ -97,12 +97,33 @@ export async function POST(request: NextRequest) {
           const aiImageUrl = result.data.images[0].url
           console.log('GPTIMG2 generation successful! Image URL:', aiImageUrl)
 
+          // Download AI image and composite with QR code
+          const aiImageResponse = await fetch(aiImageUrl)
+          const aiImageBuffer = await aiImageResponse.buffer()
+
+          // Composite QR code on center of AI image
+          const composite = await sharp(aiImageBuffer)
+            .resize(1024, 1024)
+            .composite([
+              {
+                input: qrCodeBuffer,
+                top: Math.floor((1024 - 256) / 2),
+                left: Math.floor((1024 - 256) / 2),
+                blend: 'over'
+              }
+            ])
+            .png()
+            .toBuffer()
+
+          const finalImageDataUrl = `data:image/png;base64,${composite.toString('base64')}`
+
           return NextResponse.json({
             success: true,
             qrCodeUrl: qrDataUrl,
+            finalImage: finalImageDataUrl,
             aiBackgroundUrl: aiImageUrl,
             aiModel: 'GPTIMG2',
-            message: 'AI background generated with GPTIMG2!'
+            message: 'AI QR code generated with GPTIMG2!'
           })
         } else {
           console.log('GPTIMG2 result structure invalid:', result)
@@ -130,12 +151,33 @@ export async function POST(request: NextRequest) {
             const aiImageUrl = fallbackResult.data.images[0].url
             console.log('NANOBANANA2 generation successful!')
 
+            // Download AI image and composite with QR code
+            const aiImageResponse = await fetch(aiImageUrl)
+            const aiImageBuffer = await aiImageResponse.buffer()
+
+            // Composite QR code on center of AI image
+            const composite = await sharp(aiImageBuffer)
+              .resize(1024, 1024)
+              .composite([
+                {
+                  input: qrCodeBuffer,
+                  top: Math.floor((1024 - 256) / 2),
+                  left: Math.floor((1024 - 256) / 2),
+                  blend: 'over'
+                }
+              ])
+              .png()
+              .toBuffer()
+
+            const finalImageDataUrl = `data:image/png;base64,${composite.toString('base64')}`
+
             return NextResponse.json({
               success: true,
               qrCodeUrl: qrDataUrl,
+              finalImage: finalImageDataUrl,
               aiBackgroundUrl: aiImageUrl,
               aiModel: 'NANOBANANA2',
-              message: 'AI background generated with NANOBANANA2!'
+              message: 'AI QR code generated with NANOBANANA2!'
             })
           }
         } catch (nanoBananaError) {
