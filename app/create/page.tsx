@@ -61,20 +61,13 @@ export default function CreateQR() {
       if (response.ok) {
         const data = await response.json()
 
-        if (data.aiBackgroundUrl) {
-          // AI generation successful
-          setResult({
-            qrCodeUrl: data.qrCodeUrl,
-            finalImage: data.aiBackgroundUrl,
-            isAI: true,
-            aiModel: data.aiModel || 'AI'
-          })
-        } else if (data.finalImage) {
-          // Fallback gradient
+        if (data.finalImage) {
+          // AI generation successful - use finalImage with QR code
           setResult({
             qrCodeUrl: data.qrCodeUrl,
             finalImage: data.finalImage,
-            isAI: false
+            isAI: !!data.aiModel,
+            aiModel: data.aiModel || 'AI'
           })
         }
       } else {
