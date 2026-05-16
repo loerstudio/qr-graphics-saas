@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
           // Download AI image and composite with QR code
           const aiImageResponse = await fetch(aiImageUrl)
-          const aiImageBuffer = await aiImageResponse.buffer()
+          const aiImageBuffer = Buffer.from(await aiImageResponse.arrayBuffer())
 
           // Composite QR code on center of AI image
           const composite = await sharp(aiImageBuffer)
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
 
             // Download AI image and composite with QR code
             const aiImageResponse = await fetch(aiImageUrl)
-            const aiImageBuffer = await aiImageResponse.buffer()
+            const aiImageBuffer = Buffer.from(await aiImageResponse.arrayBuffer())
 
             // Composite QR code on center of AI image
             const composite = await sharp(aiImageBuffer)
