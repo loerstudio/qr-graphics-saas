@@ -62,15 +62,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Skip AI if no valid FAL_KEY
-    if (!process.env.FAL_KEY || process.env.FAL_KEY === 'your-fal-key-here' || process.env.FAL_KEY === 'your-test-key-here') {
-      console.log('No valid FAL_KEY, using enhanced gradient fallback...')
+    if (!process.env.FAL_KEY || process.env.FAL_KEY === 'your-fal-key-here' || process.env.FAL_KEY === 'your-test-key-here' || process.env.FAL_KEY === '') {
+      console.log('No valid FAL_KEY found. Current FAL_KEY value:', process.env.FAL_KEY || 'undefined')
+      console.log('Using enhanced gradient fallback instead of AI generation')
       const fallbackResult = await generateGradientQR(url, style, enhancedPrompt)
       return NextResponse.json({
         success: true,
         qrCodeUrl: fallbackResult.qrCodeUrl,
         finalImage: fallbackResult.finalImage,
         fallback: true,
-        message: 'Generated with enhanced gradient background (add FAL_KEY for AI)'
+        message: 'Generated with enhanced gradient background (FAL_KEY not configured)'
       })
     }
 
