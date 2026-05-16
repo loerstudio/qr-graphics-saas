@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import QRCode from 'qrcode'
 import sharp from 'sharp'
+import * as fal from '@fal-ai/serverless-client'
 
 export async function POST(request: NextRequest) {
   try {

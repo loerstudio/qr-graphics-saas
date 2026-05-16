@@ -121,8 +121,8 @@ export default function SimpleQRGenerator() {
 
         <div className="mt-16 text-center text-gray-400">
           <p className="mb-4">Want AI-powered graphics and analytics?</p>
-          <a href="/" className="text-purple-400 hover:text-purple-300 transition">
-            Sign up for full features →
+          <a href="/create" className="text-purple-400 hover:text-purple-300 transition">
+            Create Stunning QR Art →
           </a>
         </div>
       </div>

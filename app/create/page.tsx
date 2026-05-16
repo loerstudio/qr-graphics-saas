@@ -24,6 +24,7 @@ export default function CreateQR() {
   const [result, setResult] = useState<{
     qrCodeUrl: string
     finalImage: string
+    isAI?: boolean
   } | null>(null)
 
   const styles = [
@@ -49,7 +50,8 @@ export default function CreateQR() {
   const generateStunningQR = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/generate-pro', {
+      // Try AI generation first
+      const response = await fetch('/api/generate-ai-qr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -57,12 +59,40 @@ export default function CreateQR() {
 
       if (response.ok) {
         const data = await response.json()
-        setResult({
-          qrCodeUrl: data.qrCodeUrl,
-          finalImage: data.finalImage
-        })
+
+        if (data.aiBackgroundUrl) {
+          // AI generation successful
+          setResult({
+            qrCodeUrl: data.qrCodeUrl,
+            finalImage: data.aiBackgroundUrl,
+            isAI: true
+          })
+        } else if (data.finalImage) {
+          // Fallback gradient
+          setResult({
+            qrCodeUrl: data.qrCodeUrl,
+            finalImage: data.finalImage,
+            isAI: false
+          })
+        }
       } else {
-        alert('Failed to generate QR code. Please try again.')
+        // If AI fails, use gradient fallback
+        const fallbackResponse = await fetch('/api/generate-pro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json()
+          setResult({
+            qrCodeUrl: fallbackData.qrCodeUrl,
+            finalImage: fallbackData.finalImage,
+            isAI: false
+          })
+        } else {
+          alert('Failed to generate QR code. Please try again.')
+        }
       }
     } catch (error) {
       console.error('Error:', error)
@@ -251,7 +281,7 @@ export default function CreateQR() {
                   </div>
 
                   <div className="text-center text-sm text-gray-500">
-                    QR Code is fully scannable • 4K Resolution • Commercial Use
+                    QR Code is fully scannable • {result.isAI ? 'AI Generated' : 'Gradient Style'} • 4K Resolution • Commercial Use
                   </div>
                 </div>
               ) : (
